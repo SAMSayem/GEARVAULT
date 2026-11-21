@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Next.js generated files
+.next/
+**/.next/
+out/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Vercel
+.vercel/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Compiled server output
+dist/
+**/dist/
+
+# Mac system files
+.DS_Store
+**/.DS_Store
