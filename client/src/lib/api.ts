@@ -1,0 +1,3 @@
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+export async function api<T=any>(path:string, options:RequestInit={}, token?:string):Promise<T>{const response=await fetch(`${API_URL}${path}`,{...options,headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{ } ),...options.headers},cache:"no-store"});const data=await response.json().catch(()=>({message:"Unexpected server response"}));if(!response.ok)throw new Error(data.message||"Request failed");return data as T;}
+export async function getApiToken(){const r=await fetch("/api/session-token",{cache:"no-store"});if(!r.ok)throw new Error("Please sign in again");return (await r.json()).token as string;}
