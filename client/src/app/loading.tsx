@@ -1,12 +1,1 @@
-export default function Loading() {
-  return (
-    <div className="container grid min-h-[55vh] place-items-center">
-      <div className="text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-orange-400 border-t-transparent" />
-        <p className="mt-4 text-sm text-gray-500">
-          Preparing your GearVault experience…
-        </p>
-      </div>
-    </div>
-  );
-}
+export default function Loading(){return <div className="container grid min-h-[55vh] place-items-center"><div className="text-center"><div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-orange-400 border-t-transparent"/><p className="mt-4 text-sm text-gray-500">Preparing your GearVault experience…</p></div></div>}
