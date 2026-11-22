@@ -1,1 +1,20 @@
-import Link from "next/link";export function SiteFooter(){return <footer className="border-t border-white/10 bg-black/20"><div className="container grid gap-8 py-12 md:grid-cols-3"><div><div className="text-xl font-black">GEAR<span className="text-orange-400">VAULT</span></div><p className="mt-3 max-w-xs text-sm leading-6 text-gray-500">The equipment you need, for the time you need it. A smarter way to get every project moving.</p></div><div><b className="text-sm">Explore</b><div className="mt-3 grid gap-2 text-sm text-gray-400"><Link href="/equipment">Browse equipment</Link><Link href="/#how-it-works">How it works</Link><Link href="/register">Become an owner</Link></div></div><div><b className="text-sm">Built for every big idea.</b><p className="mt-3 text-sm text-gray-500">Secure rentals · Verified listings · Flexible terms</p></div></div><div className="border-t border-white/10 py-5 text-center text-xs text-gray-600">© {new Date().getFullYear()} GearVault. All rights reserved.</div></footer>}
+import Link from "next/link";
+import { ArrowUpRight, ShieldCheck, Package, Clock3 } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
+
+export function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="container footer-main">
+        <div className="footer-brand-column">
+          <BrandLogo footer />
+          <p className="footer-description">The equipment you need, for the time you need it. A smarter, more flexible way to keep every project moving.</p>
+          <div className="footer-trust-points"><span><ShieldCheck size={14}/> Secure rental process</span><span><Package size={14}/> Reviewed equipment listings</span><span><Clock3 size={14}/> Flexible rental periods</span></div>
+        </div>
+        <div><h3 className="footer-heading">Explore</h3><div className="footer-links"><Link href="/equipment">Browse equipment</Link><Link href="/#how-it-works">How it works</Link><Link href="/register">Become an owner</Link><Link href="/dashboard">Your dashboard</Link></div></div>
+        <div><h3 className="footer-heading">Built for every big idea</h3><p className="footer-trust">From essential tools to specialist equipment, GearVault helps people access the resources their projects need.</p><Link href="/equipment" className="footer-marketplace-link">Explore the marketplace <ArrowUpRight size={14}/></Link></div>
+      </div>
+      <div className="footer-bottom"><div className="container footer-bottom-inner"><span>© {new Date().getFullYear()} GearVault. All rights reserved.</span><span>Rent smarter. Build more.</span><Link href="/equipment">Explore marketplace <ArrowUpRight size={13}/></Link></div></div>
+    </footer>
+  );
+}

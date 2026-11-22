@@ -42,13 +42,18 @@ router.get("/", async (req, res) => {
 
   if (availability === "available") {
     filter.availableQuantity = { $gt: 0 };
+  } else if (availability === "unavailable") {
+    filter.availableQuantity = { $lte: 0 };
   }
 
-  if (q) {
+  // Escape user-provided search text so it is treated as text, not a regex program.
+  const searchText = String(q).trim().slice(0, 80);
+  if (searchText) {
+    const escaped = searchText.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&");
     filter.$or = [
-      { title: { $regex: String(q), $options: "i" } },
-      { location: { $regex: String(q), $options: "i" } },
-      { category: { $regex: String(q), $options: "i" } },
+      { title: { $regex: escaped, $options: "i" } },
+      { location: { $regex: escaped, $options: "i" } },
+      { category: { $regex: escaped, $options: "i" } },
     ];
   }
 
@@ -373,11 +378,25 @@ router.patch("/admin/:id", verifyToken, verifyAdmin, async (req, res) => {
     }
   }
 
+  if (allowed.price !== undefined && (!Number.isFinite(Number(allowed.price)) || Number(allowed.price) <= 0)) {
+    return res.status(400).json({ message: "Invalid rental price" });
+  }
+  if (allowed.availableQuantity !== undefined && (!Number.isInteger(Number(allowed.availableQuantity)) || Number(allowed.availableQuantity) < 1)) {
+    return res.status(400).json({ message: "Invalid available quantity" });
+  }
+  if (allowed.status !== undefined && !["pending", "approved", "rejected"].includes(allowed.status)) {
+    return res.status(400).json({ message: "Invalid equipment status" });
+  }
+
   allowed.updatedAt = new Date();
 
-  await db()
+  const result = await db()
     .collection("equipment")
     .updateOne({ _id: new ObjectId(equipmentId) }, { $set: allowed });
+
+  if (!result.matchedCount) {
+    return res.status(404).json({ message: "Equipment not found" });
+  }
 
   res.json({ message: "Equipment updated" });
 });

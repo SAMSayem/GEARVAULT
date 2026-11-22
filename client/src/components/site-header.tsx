@@ -1,4 +1,44 @@
 "use client";
-import Link from "next/link";import {useEffect,useState} from "react";import {usePathname,useRouter} from "next/navigation";import {Menu, X, Wrench} from "lucide-react";import {authClient} from "@/lib/auth-client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 import { ThemeToggle } from "@/components/theme-toggle";
-export function SiteHeader(){const [open,setOpen]=useState(false);const {data:session}=authClient.useSession();const router=useRouter();const path=usePathname();useEffect(()=>setOpen(false),[path]);const links=[ ["Home","/"],["Equipment","/equipment"],["How it works","/#how-it-works"] ];return <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090b0fe8] backdrop-blur-xl"><div className="container flex h-[76px] items-center justify-between"><Link href="/" className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-orange-300 to-orange-600 text-black"><Wrench size={21}/></span><span className="text-xl font-black tracking-tight">GEAR<span className="text-orange-400">VAULT</span><small className="block text-[9px] font-semibold tracking-[.25em] text-gray-500">EQUIPMENT RENTALS</small></span></Link><nav className="hidden items-center gap-8 md:flex">{links.map(([label,href])=><Link key={label} href={href} className="text-sm text-gray-300 hover:text-orange-300">{label}</Link>)}<ThemeToggle /></nav><div className="hidden items-center gap-3 md:flex">{session?.user?<><Link className="btn-ghost text-sm" href="/dashboard">Dashboard</Link><button className="btn-primary text-sm" onClick={async()=>{await authClient.signOut();router.push("/");router.refresh()}}>Logout</button></>:<><Link href="/login" className="btn-ghost text-sm">Login</Link><Link href="/register" className="btn-primary text-sm">Get Started</Link></>}</div><button className="md:hidden" onClick={()=>setOpen(!open)} aria-label="Toggle menu">{open?<X/>:<Menu/>}</button></div>{open&&<div className="container grid gap-4 border-t border-white/10 py-5 md:hidden">{links.map(([l,h])=><Link key={l} href={h}>{l}</Link>)}{session?.user?<Link href="/dashboard">Dashboard</Link>:<><Link href="/login">Login</Link><Link href="/register">Register</Link></>}</div>}</header>}
+import { BrandLogo } from "@/components/brand-logo";
+
+export function SiteHeader() {
+  const [open, setOpen] = useState(false);
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
+  const path = usePathname();
+  useEffect(() => setOpen(false), [path]);
+
+  const links = [["Home", "/"], ["Equipment", "/equipment"], ["How it works", "/#how-it-works"]];
+  const logout = async () => {
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  return (
+    <header className="site-header">
+      <div className="container site-header-inner">
+        <BrandLogo />
+        <nav className="site-nav" aria-label="Main navigation">
+          {links.map(([label, href]) => <Link key={label} href={href} className={path === href ? "current" : ""}>{label}</Link>)}
+          <ThemeToggle />
+        </nav>
+        <div className="site-actions">
+          {session?.user ? <><Link className="btn-ghost text-sm" href="/dashboard">Dashboard</Link><button className="btn-primary text-sm" onClick={logout}>Logout</button></> : <><Link href="/login" className="btn-ghost text-sm">Login</Link><Link href="/register" className="btn-primary text-sm">Get Started</Link></>}
+        </div>
+        <button className="mobile-menu-button" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"}>{open ? <X size={22}/> : <Menu size={22}/>}</button>
+      </div>
+      {open && <div className="mobile-menu"><div className="container mobile-menu-inner">
+        {links.map(([label, href]) => <Link key={label} href={href}>{label}</Link>)}
+        <div className="mobile-menu-tools"><ThemeToggle />{session?.user ? <><Link href="/dashboard" className="btn-ghost">Dashboard</Link><button className="btn-primary" onClick={logout}>Logout</button></> : <><Link href="/login" className="btn-ghost">Login</Link><Link href="/register" className="btn-primary">Register</Link></>}</div>
+      </div></div>}
+    </header>
+  );
+}

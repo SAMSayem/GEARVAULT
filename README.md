@@ -4,8 +4,8 @@ A responsive equipment rental marketplace connecting equipment owners with custo
 
 ## Live URL
 
-- Frontend: `https://YOUR-VERCEL-DOMAIN.vercel.app` (replace after deployment)
-- Backend: `https://YOUR-RENDER-SERVICE.onrender.com` (replace after deployment)
+- Frontend: Not deployed yet — add your Vercel URL after deployment.
+- Backend: Not deployed yet — add your Render URL after deployment.
 
 ## Features
 - Public registration lets users choose Customer or Owner; new Google sign-ins default to Customer. Admin assignment is restricted to the admin dashboard.
@@ -18,7 +18,8 @@ A responsive equipment rental marketplace connecting equipment owners with custo
 - Equipment details, owner information, favorites, rental request form, date/quantity validation, and duration-based totals.
 - Stripe Checkout with signed webhook processing; successful payments create booking and payment records.
 - Customer, Owner, and Admin dashboard endpoints; profile management; owner equipment submission; admin approval and role management.
-- Admin and owner analytics endpoints (see API route list; dashboard cards are ready to display returned metrics).
+- Admin and owner analytics endpoints with monthly booking/revenue and earnings breakdowns.
+- Server-side ImgBB upload proxy with image MIME-type and 8 MB size checks; the API key is not shipped to the browser.
 - Loading, error, and not-found pages; scheduled booking completion and expired checkout cleanup.
 
 ## Tech stack / npm packages
@@ -41,8 +42,9 @@ server/  Express REST API and Stripe webhook
 3. Create a MongoDB Atlas database and use the same `MONGODB_URI` and `DB_NAME` in both apps. Never commit env files.
 4. Set the same `JWT_SECRET` in both apps. Set Better Auth secret/URL and Google OAuth credentials in the client.
 5. Configure Stripe test keys and webhook secret in the server. Set success/cancel URLs to the client domain.
-6. From the repository root run `npm install`, `npm install --prefix client`, `npm install --prefix server`, then `npm run dev`.
-7. Register the intended admin email through the normal app first, then promote it using `npm run seed:admin --prefix server -- admin@example.com`. The seed script promotes an existing Better Auth account and never stores a plaintext password.
+6. Create an ImgBB API key from your ImgBB account and set it as `IMGBB_API_KEY` in the client hosting environment. The key is read only by the Next.js server-side upload route; it is not exposed as a `NEXT_PUBLIC_` variable.
+7. From the repository root run `npm install`, `npm install --prefix client`, `npm install --prefix server`, then `npm run dev`.
+8. Register the intended admin email through the normal app first, then promote it using `npm run seed:admin --prefix server -- admin@example.com`. The seed script promotes an existing Better Auth account and never stores a plaintext password.
 
 Client runs on `http://localhost:3000`; API runs on `http://localhost:4000`. Health check: `GET http://localhost:4000/health`.
 
@@ -66,7 +68,7 @@ Client runs on `http://localhost:3000`; API runs on `http://localhost:4000`. Hea
 
 ## Important production checklist
 
-- **Stripe country availability:** Stripe currently does not list Bangladesh among its supported merchant-account countries. A business registered in Bangladesh cannot onboard directly as a Stripe merchant at this time. The Stripe integration is included for the assignment and can be tested with eligible Stripe test credentials, but live payment activation requires a legitimately eligible business account in a supported country. Check [Stripe global availability](https://stripe.com/global) and [account eligibility requirements](https://support.stripe.com/questions/requirements-to-open-a-stripe-account-in-another-country) before planning production payments. Do not use false business details or an unsupported-country workaround.
+- **Stripe country availability:** BDT is listed by Stripe as a supported presentment currency, but currency support is separate from merchant-account country eligibility. Bangladesh is not currently listed among Stripe's supported merchant-account countries. A business registered in Bangladesh therefore cannot onboard directly as a Stripe merchant based on the current country list. The integration can be tested with eligible Stripe test credentials, but live activation requires a legitimately eligible business account in a supported country. Check [Stripe global availability](https://stripe.com/global), [supported currencies](https://docs.stripe.com/currencies), and [account eligibility requirements](https://support.stripe.com/questions/requirements-to-open-a-stripe-account-in-another-country). Do not use false business details or an unsupported-country workaround.
 
 - Use strong, unique production secrets and test mode Stripe keys until payment flow is verified.
 - Verify webhook delivery and signature validation using Stripe CLI before accepting live payments. Do not rely on the browser success redirect as proof of payment.
@@ -85,6 +87,7 @@ Client runs on `http://localhost:3000`; API runs on `http://localhost:4000`. Hea
 - `GET/POST/DELETE /api/favorites...`
 - `GET /api/bookings/mine|owner|admin`; `PATCH /api/bookings/:id/status`
 - `POST /api/payments/checkout`; `GET /api/payments/session/:id`
+- `POST /api/upload` (Next.js same-origin upload route; requires `IMGBB_API_KEY`)
 - `POST /api/webhooks/stripe` (Stripe signature required)
 
 ## Git commit requirement

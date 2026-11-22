@@ -15,19 +15,20 @@ const enrichedBookings = () => [
   {
     $addFields: {
       equipmentObjectId: {
-        $convert: {
-          input: "$equipmentId",
-          to: "objectId",
-          onError: null,
-          onNull: null,
-        },
+        $convert: { input: "$equipmentId", to: "objectId", onError: null, onNull: null },
+      },
+      customerObjectId: {
+        $convert: { input: "$customerId", to: "objectId", onError: null, onNull: null },
+      },
+      ownerObjectId: {
+        $convert: { input: "$ownerId", to: "objectId", onError: null, onNull: null },
       },
     },
   },
   {
     $lookup: {
       from: "user",
-      localField: "customerId",
+      localField: "customerObjectId",
       foreignField: "_id",
       as: "customer",
     },
@@ -35,7 +36,7 @@ const enrichedBookings = () => [
   {
     $lookup: {
       from: "user",
-      localField: "ownerId",
+      localField: "ownerObjectId",
       foreignField: "_id",
       as: "owner",
     },
@@ -56,6 +57,8 @@ const enrichedBookings = () => [
       "customer.name": 1,
       "customer.email": 1,
       "customer.image": 1,
+      "customer.phone": 1,
+      "customer.address": 1,
       "owner.name": 1,
       "owner.email": 1,
       "equipment.title": 1,
@@ -145,42 +148,44 @@ router.get("/admin", verifyToken, verifyAdmin, async (_req, res) => {
   res.json({ bookings });
 });
 
-// Update booking status
+// Update booking status. Owners can confirm their own paid bookings;
+// admins can manage any booking. Customers may cancel only their own unpaid booking.
 router.patch("/:id/status", verifyToken, async (req: AuthRequest, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Authentication required" });
-  }
-
-  const allowed = ["confirmed", "completed", "cancelled"];
-
-  if (!allowed.includes(req.body.status)) {
-    return res.status(400).json({ message: "Invalid booking status" });
-  }
+  if (!req.user) return res.status(401).json({ message: "Authentication required" });
 
   const bookingId = String(req.params.id);
+  const nextStatus = String(req.body?.status || "");
+  const allowed = ["confirmed", "cancelled", "completed"];
 
-  if (!ObjectId.isValid(bookingId)) {
-    return res.status(400).json({ message: "Invalid booking ID" });
+  if (!ObjectId.isValid(bookingId) || !allowed.includes(nextStatus)) {
+    return res.status(400).json({ message: "Invalid booking ID or status" });
   }
 
-  const query: any = { _id: new ObjectId(bookingId) };
+  const booking = await db().collection("bookings").findOne({ _id: new ObjectId(bookingId) });
+  if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-  if (req.user.role === "owner") {
-    query.ownerId = req.user.id;
-  } else if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Not allowed" });
+  const isAdmin = req.user.role === "admin";
+  const isOwner = req.user.role === "owner" && booking.ownerId === req.user.id;
+  const isCustomer = req.user.role === "customer" && booking.customerId === req.user.id;
+
+  if (!isAdmin && !isOwner && !(isCustomer && nextStatus === "cancelled" && booking.paymentStatus !== "paid")) {
+    return res.status(403).json({ message: "You cannot manage this booking" });
+  }
+  if (nextStatus === "confirmed" && !isOwner && !isAdmin) {
+    return res.status(403).json({ message: "Only the equipment owner or admin can confirm a booking" });
+  }
+  if (nextStatus === "completed" && !isAdmin) {
+    return res.status(403).json({ message: "Only an administrator can manually complete a booking" });
+  }
+  if (nextStatus === "confirmed" && booking.paymentStatus !== "paid") {
+    return res.status(409).json({ message: "A booking must be paid before it can be confirmed" });
   }
 
-  await db()
-    .collection("bookings")
-    .updateOne(query, {
-      $set: {
-        bookingStatus: req.body.status,
-        updatedAt: new Date(),
-      },
-    });
-
-  res.json({ message: "Booking status updated" });
+  await db().collection("bookings").updateOne(
+    { _id: new ObjectId(bookingId) },
+    { $set: { bookingStatus: nextStatus, updatedAt: new Date() } },
+  );
+  res.json({ message: "Booking status updated", bookingStatus: nextStatus });
 });
 
 export default router;

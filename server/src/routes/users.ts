@@ -79,6 +79,10 @@ router.patch("/me", verifyToken, async (req: AuthRequest, res) => {
       allowed[k] = req.body[k].slice(0, 500);
     }
   }
+  // Keep Better Auth's standard image field synchronized with the editable profile URL.
+  if (typeof req.body.photoURL === "string") {
+    allowed.image = req.body.photoURL.slice(0, 500);
+  }
 
   await db()
     .collection<any>("user")

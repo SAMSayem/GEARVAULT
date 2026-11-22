@@ -46,32 +46,46 @@ app.post(
           .collection("checkoutSessions")
           .findOne({ stripeSessionId: session.id });
         if (draft && session.payment_status === "paid") {
-          const exists = await db()
-            .collection("payments")
-            .findOne({ stripeSessionId: session.id });
-          if (!exists) {
-            const b = {
+          const payments = db().collection("payments");
+          const bookings = db().collection("bookings");
+          const paymentExists = await payments.findOne({ stripeSessionId: session.id });
+
+          if (!paymentExists) {
+            const existingBooking = await bookings.findOne({ stripeSessionId: session.id });
+            const booking = {
               ...draft.bookingDraft,
               paymentStatus: "paid",
               bookingStatus: "confirmed",
               stripeSessionId: session.id,
-              createdAt: new Date(),
               paidAt: new Date(),
+              updatedAt: new Date(),
             };
-            const result = await db().collection("bookings").insertOne(b);
-            await db()
-              .collection("payments")
-              .insertOne({
-                stripeSessionId: session.id,
-                bookingId: String(result.insertedId),
-                customerId: b.customerId,
-                ownerId: b.ownerId,
-                amountTotal: session.amount_total,
-                currency: session.currency,
-                paymentIntent: session.payment_intent,
-                status: "succeeded",
-                createdAt: new Date(),
-              });
+            const bookingId = existingBooking
+              ? existingBooking._id
+              : (await bookings.insertOne({ ...booking, createdAt: new Date() })).insertedId;
+
+            // The unique stripeSessionId index makes webhook retries idempotent.
+            await payments.updateOne(
+              { stripeSessionId: session.id },
+              {
+                $setOnInsert: {
+                  stripeSessionId: session.id,
+                  bookingId: String(bookingId),
+                  customerId: booking.customerId,
+                  ownerId: booking.ownerId,
+                  amountTotal: session.amount_total,
+                  currency: session.currency,
+                  paymentIntent: session.payment_intent,
+                  status: "succeeded",
+                  createdAt: new Date(),
+                },
+              },
+              { upsert: true },
+            );
+            await bookings.updateOne(
+              { _id: bookingId },
+              { $set: { paymentStatus: "paid", bookingStatus: "confirmed", paidAt: new Date() } },
+            );
           }
           await db()
             .collection("checkoutSessions")
