@@ -4,8 +4,8 @@ A responsive equipment rental marketplace connecting equipment owners with custo
 
 ## Live URL
 
-- Frontend: Not deployed yet — add your Vercel URL after deployment.
-- Backend: Not deployed yet — add your Render URL after deployment.
+- **Frontend:** https://gearvault-l12a.vercel.app
+- **Backend:** Add your deployed Render API URL here when available.
 
 ## Features
 - Public registration lets users choose Customer or Owner; new Google sign-ins default to Customer. Admin assignment is restricted to the admin dashboard.
@@ -77,19 +77,4 @@ Client runs on `http://localhost:3000`; API runs on `http://localhost:4000`. Hea
 - Configure image host allow-lists if using Next Image optimization; external image URLs are currently rendered unoptimized.
 - Test simultaneous bookings, inventory contention, refunds/cancellations, and failed Stripe payments before real-world use.
 
-## API overview
 
-- `GET /health`
-- `GET /api/equipment` and `GET /api/equipment/:id`
-- `POST /api/equipment/owner`, `GET/PATCH/DELETE /api/equipment/owner...`
-- `GET/PATCH/DELETE /api/equipment/admin...`
-- `GET/PATCH /api/users/me`; `GET/PATCH /api/users/admin...`
-- `GET/POST/DELETE /api/favorites...`
-- `GET /api/bookings/mine|owner|admin`; `PATCH /api/bookings/:id/status`
-- `POST /api/payments/checkout`; `GET /api/payments/session/:id`
-- `POST /api/upload` (Next.js same-origin upload route; requires `IMGBB_API_KEY`)
-- `POST /api/webhooks/stripe` (Stripe signature required)
-
-## Git commit requirement
-
-Do not submit one giant commit. Use the suggested commit sequence in `GIT-COMMIT-PLAN.md` to create at least 20 meaningful client commits and 12 meaningful server commits in your own GitHub repositories. Commits must represent real incremental work and should not be fabricated after the fact.
