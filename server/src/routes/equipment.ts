@@ -378,13 +378,23 @@ router.patch("/admin/:id", verifyToken, verifyAdmin, async (req, res) => {
     }
   }
 
-  if (allowed.price !== undefined && (!Number.isFinite(Number(allowed.price)) || Number(allowed.price) <= 0)) {
+  if (
+    allowed.price !== undefined &&
+    (!Number.isFinite(Number(allowed.price)) || Number(allowed.price) <= 0)
+  ) {
     return res.status(400).json({ message: "Invalid rental price" });
   }
-  if (allowed.availableQuantity !== undefined && (!Number.isInteger(Number(allowed.availableQuantity)) || Number(allowed.availableQuantity) < 1)) {
+  if (
+    allowed.availableQuantity !== undefined &&
+    (!Number.isInteger(Number(allowed.availableQuantity)) ||
+      Number(allowed.availableQuantity) < 1)
+  ) {
     return res.status(400).json({ message: "Invalid available quantity" });
   }
-  if (allowed.status !== undefined && !["pending", "approved", "rejected"].includes(allowed.status)) {
+  if (
+    allowed.status !== undefined &&
+    !["pending", "approved", "rejected"].includes(allowed.status)
+  ) {
     return res.status(400).json({ message: "Invalid equipment status" });
   }
 

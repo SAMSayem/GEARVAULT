@@ -16,7 +16,15 @@ export function ThemeToggle() {
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("gearvault-theme", next);
   }
-  return <button type="button" onClick={toggle} className="theme-toggle" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
-    {theme === "dark" ? <Sun size={16}/> : <Moon size={16}/>}<span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-  </button>;
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="theme-toggle"
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+    >
+      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+      <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+    </button>
+  );
 }

@@ -1,1 +1,149 @@
-"use client";import {useEffect,useState} from "react";import {EquipmentCard} from "@/components/equipment-card";import {API_URL} from "@/lib/api";import {Search,SlidersHorizontal} from "lucide-react";export default function EquipmentPage(){const [items,setItems]=useState<any[]>([]);const [loading,setLoading]=useState(true);const [q,setQ]=useState("");const [category,setCategory]=useState("");const [type,setType]=useState("");const [minPrice,setMinPrice]=useState("");const [maxPrice,setMaxPrice]=useState("");const [availability,setAvailability]=useState("available");const [sort,setSort]=useState("recent");useEffect(()=>{const fromUrl=new URLSearchParams(window.location.search).get("category");if(fromUrl)setCategory(fromUrl)},[]);useEffect(()=>{const controller=new AbortController();setLoading(true);const query=new URLSearchParams({q,category,rentalType:type,availability,sort,limit:"30",minPrice,maxPrice});fetch(`${API_URL}/equipment?${query}`,{signal:controller.signal}).then(r=>r.json()).then(d=>setItems(d.items||[])).catch(()=>{}).finally(()=>setLoading(false));return()=>controller.abort()},[q,category,type,availability,sort,minPrice,maxPrice]);return <div className="container py-12"><p className="eyebrow">The marketplace</p><h1 className="mt-3 text-4xl font-black">Find your next <span className="gradient-text">workhorse.</span></h1><p className="mt-3 text-gray-500">Search professional equipment from trusted local owners.</p><div className="glass mt-8 grid gap-3 rounded-2xl p-4 md:grid-cols-3 lg:grid-cols-7"><label className="relative"><Search className="absolute left-3 top-3 text-gray-500" size={17}/><input className="field pl-10" placeholder="Search name or location" value={q} onChange={e=>setQ(e.target.value)}/></label><select className="field" value={category} onChange={e=>setCategory(e.target.value)}><option value="">All categories</option>{["Construction","Photography","Vehicles","Agriculture","Electronics","Events"].map(x=><option key={x}>{x}</option>)}</select><select className="field" value={type} onChange={e=>setType(e.target.value)}><option value="">Any rental type</option>{["daily","weekly","monthly"].map(x=><option key={x} value={x}>{x}</option>)}</select><select className="field" value={availability} onChange={e=>setAvailability(e.target.value)}><option value="available">Available</option><option value="unavailable">Unavailable</option><option value="all">All status</option></select><input className="field" type="number" min="0" placeholder="Min ৳" value={minPrice} onChange={e=>setMinPrice(e.target.value)}/><input className="field" type="number" min="0" placeholder="Max ৳" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)}/><select className="field" value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">Recently added</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></div><div className="mt-8 flex items-center justify-between"><p className="text-sm text-gray-500">{items.length} equipment listings</p><span className="text-xs text-gray-600"><SlidersHorizontal className="mr-1 inline" size={14}/> Server-side filters</span></div>{loading?<div className="py-24 text-center text-gray-500">Loading equipment…</div>:items.length?<div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.map(item=><EquipmentCard key={item._id} item={item}/>)}</div>:<div className="glass mt-5 rounded-2xl p-12 text-center text-gray-500">No matching equipment found. Try adjusting your filters.</div>}</div>}
+"use client";
+import { useEffect, useState } from "react";
+import { EquipmentCard } from "@/components/equipment-card";
+import { API_URL } from "@/lib/api";
+import { Search, SlidersHorizontal } from "lucide-react";
+export default function EquipmentPage() {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
+  const [category, setCategory] = useState("");
+  const [type, setType] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [availability, setAvailability] = useState("available");
+  const [sort, setSort] = useState("recent");
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("category");
+    if (fromUrl) setCategory(fromUrl);
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    const query = new URLSearchParams({
+      q,
+      category,
+      rentalType: type,
+      availability,
+      sort,
+      limit: "30",
+      minPrice,
+      maxPrice,
+    });
+    fetch(`${API_URL}/equipment?${query}`, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((d) => setItems(d.items || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, [q, category, type, availability, sort, minPrice, maxPrice]);
+  return (
+    <div className="container py-12">
+      <p className="eyebrow">The marketplace</p>
+      <h1 className="mt-3 text-4xl font-black">
+        Find your next <span className="gradient-text">workhorse.</span>
+      </h1>
+      <p className="mt-3 text-gray-500">
+        Search professional equipment from trusted local owners.
+      </p>
+      <div className="glass mt-8 grid gap-3 rounded-2xl p-4 md:grid-cols-3 lg:grid-cols-7">
+        <label className="relative">
+          <Search className="absolute left-3 top-3 text-gray-500" size={17} />
+          <input
+            className="field pl-10"
+            placeholder="Search name or location"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </label>
+        <select
+          className="field"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">All categories</option>
+          {[
+            "Construction",
+            "Photography",
+            "Vehicles",
+            "Agriculture",
+            "Electronics",
+            "Events",
+          ].map((x) => (
+            <option key={x}>{x}</option>
+          ))}
+        </select>
+        <select
+          className="field"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="">Any rental type</option>
+          {["daily", "weekly", "monthly"].map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </select>
+        <select
+          className="field"
+          value={availability}
+          onChange={(e) => setAvailability(e.target.value)}
+        >
+          <option value="available">Available</option>
+          <option value="unavailable">Unavailable</option>
+          <option value="all">All status</option>
+        </select>
+        <input
+          className="field"
+          type="number"
+          min="0"
+          placeholder="Min ৳"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+        />
+        <input
+          className="field"
+          type="number"
+          min="0"
+          placeholder="Max ৳"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
+        <select
+          className="field"
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+        >
+          <option value="recent">Recently added</option>
+          <option value="price_asc">Price: low to high</option>
+          <option value="price_desc">Price: high to low</option>
+        </select>
+      </div>
+      <div className="mt-8 flex items-center justify-between">
+        <p className="text-sm text-gray-500">
+          {items.length} equipment listings
+        </p>
+        <span className="text-xs text-gray-600">
+          <SlidersHorizontal className="mr-1 inline" size={14} /> Server-side
+          filters
+        </span>
+      </div>
+      {loading ? (
+        <div className="py-24 text-center text-gray-500">
+          Loading equipment…
+        </div>
+      ) : items.length ? (
+        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
+            <EquipmentCard key={item._id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <div className="glass mt-5 rounded-2xl p-12 text-center text-gray-500">
+          No matching equipment found. Try adjusting your filters.
+        </div>
+      )}
+    </div>
+  );
+}
